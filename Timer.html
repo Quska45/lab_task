@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script>
+    //인자로 콜백 될 함수와 콜백 함수에서 사용될 인자를 받는다. 
+    function Timer(){
+      //실행되야할 콜백 목록
+      this.innerTimerList = [];
+      //반복실행을 원하는 시간
+      this.time = 0;
+    }
+
+    //Timer내부적으로 쓰인다. 콜백을 Timer에 등록할 수 있게 하는 객체를 생성
+    function InnerTimer(){
+      //콜백
+      this.callback = Array.prototype.shift.call(arguments);
+      //콜백의 인자
+      if(typeof cb != "function"){
+        this.args = arguments;
+      }
+    }
+
+    //실행되야 하는 콜백을 등록하는 함수
+    //callback, time, 인자순으로 입력한다.
+    Timer.prototype.setTimerFn = function(){
+      //콜백
+      var callback = Array.prototype.shift.call(arguments);
+
+      //반복실행을 원하는 시간
+      this.time = Array.prototype.shift.call(arguments);
+
+      //콜백 인자
+      var args = arguments;
+
+      var innerTimer = new InnerTimer(callback, args);
+
+      this.innerTimerList.push(innerTimer);
+    }
+
+    //콜백들을 일정 시간 기준으로 실행시키는 함수
+    Timer.prototype.startIntervalTimer = function(){
+      var _this = this;
+      var time = this.time
+      function startFn(){
+        setInterval(function(){
+          _this.innerTimerList.reduce(function(acc, cur, i){
+            cur.callback(cur.args);
+            return acc;
+          }, this.innerTimerList)
+        }, time);
+      }
+      startFn();
+    }
+
+    //테스트
+    function test(){
+      console.log("test함수");
+    }
+
+    function test1(a,b){
+      console.log("test1함수"+a+b);
+    }
+    function test2(a,b,c){
+      console.log("test2함수"+a+b+c);
+    }
+
+    var timer = new Timer();
+    timer.setTimerFn(test, 800)
+    timer.setTimerFn(test1,800,1,2)
+    timer.setTimerFn(test2,800,1,2,3)
+    timer.startIntervalTimer();
+  </script>
+</head>
+<body>
+  
+</body>
+</html>
